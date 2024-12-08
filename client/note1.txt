@@ -1,0 +1,117 @@
+Автозапуск Python-скрипта после выключения и перезагрузки компьютера зависит от операционной системы. Вот как это сделать:
+
+---
+
+### **1. На Linux**
+
+#### **С использованием `systemd`**
+1. Создайте systemd-сервис:
+   ```bash
+   sudo nano /etc/systemd/system/myscript.service
+   ```
+2. Добавьте следующее содержимое:
+   ```ini
+   [Unit]
+   Description=My Python Script
+   After=network.target
+
+   [Service]
+   ExecStart=/usr/bin/python3 /path/to/your/script.py
+   Restart=always
+   User=your_username
+   WorkingDirectory=/path/to/working/directory
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+   - Замените `/usr/bin/python3` на путь к вашему Python.
+   - Замените `/path/to/your/script.py` на полный путь к вашему скрипту.
+
+3. Сохраните файл и закройте редактор.
+
+4. Перезагрузите конфигурацию systemd:
+   ```bash
+   sudo systemctl daemon-reload
+   ```
+
+5. Включите сервис, чтобы он запускался при старте:
+   ```bash
+   sudo systemctl enable myscript
+   ```
+
+6. Запустите сервис:
+   ```bash
+   sudo systemctl start myscript
+   ```
+
+7. Проверьте статус:
+   ```bash
+   sudo systemctl status myscript
+   ```
+
+---
+
+#### **С использованием `crontab`**
+1. Откройте crontab для редактирования:
+   ```bash
+   crontab -e
+   ```
+
+2. Добавьте строку для автозапуска при старте системы:
+   ```bash
+   @reboot /usr/bin/python3 /path/to/your/script.py
+   ```
+   - Замените пути на ваши.
+
+3. Сохраните файл и выйдите.
+
+---
+
+### **2. На Windows**
+
+#### **С использованием Task Scheduler**
+1. Откройте *Task Scheduler* (Планировщик задач).
+2. Выберите "Создать задачу" (Create Task).
+3. Вкладка "Общие" (General):
+   - Укажите имя задачи.
+   - Выберите "Выполнять для всех пользователей" (Run whether user is logged on or not).
+4. Вкладка "Триггеры" (Triggers):
+   - Нажмите "Создать" (New) и выберите "При запуске" (At startup).
+5. Вкладка "Действия" (Actions):
+   - Нажмите "Создать" (New).
+   - Выберите "Запустить программу" (Start a program).
+   - Укажите путь к `python.exe` и добавьте полный путь к вашему скрипту как аргумент.
+6. Сохраните задачу.
+
+---
+
+### **3. Кроссплатформенные решения**
+
+#### **С использованием `pm2`**
+1. Установите PM2:
+   ```bash
+   npm install pm2 -g
+   ```
+
+2. Запустите ваш скрипт:
+   ```bash
+   pm2 start /path/to/your/script.py --interpreter python3
+   ```
+
+3. Сохраните конфигурацию PM2:
+   ```bash
+   pm2 save
+   ```
+
+4. Настройте автозапуск PM2 при загрузке системы:
+   ```bash
+   pm2 startup
+   ```
+   - Следуйте инструкциям, которые появятся в консоли.
+
+---
+
+### **Рекомендации**
+- **Linux:** `systemd` — лучший выбор для надежного автозапуска.
+- **Windows:** Task Scheduler — стандартный способ автозапуска.
+- **Кроссплатформенно:** PM2 удобно использовать для нескольких процессов.

